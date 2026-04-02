@@ -51,9 +51,16 @@
         <button class="nav-tab" data-section="importance-section" role="tab">Feature Importance</button>
       </div>
 
-      <div class="nav-badge">
-        <div class="nav-badge-dot"></div>
-        Phase 1 Trial System
+      <div class="nav-user-area">
+        <div class="nav-badge">
+          <div class="nav-badge-dot"></div>
+          Phase 1 Trial System
+        </div>
+        <div class="nav-user-chip" id="nav-user-chip" style="display:none;">
+          <div class="nav-user-avatar" id="nav-user-avatar"></div>
+          <span class="nav-user-name" id="nav-user-name"></span>
+          <button class="nav-logout-btn" id="nav-logout-btn" title="Sign Out">🚪</button>
+        </div>
       </div>
     </nav>
 
@@ -243,6 +250,10 @@
           <!-- ── Step 1: Demographics ── -->
           <div class="form-step active" id="step-1">
             <div class="form-section-title">👤 Demographic Information</div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="patient_name">Patient Full Name *</label>
+              <input type="text" id="patient_name" class="form-control" placeholder="e.g. John Smith" required style="text-transform: capitalize;" />
+            </div>
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label" for="age">Age <span class="unit">(years)</span> *</label>
@@ -682,13 +693,17 @@
 
   </div><!-- /.app-wrapper -->
 
+  <!-- Firebase Auth -->
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
+
   <!-- Scripts -->
-  <script src="js/data.js?v=3"></script>
-  <script src="js/data_computed.js?v=3"></script>
-  <script src="js/ml-models.js?v=3"></script>
-  <script src="js/ml-engine.js?v=3"></script>
-  <script src="js/charts.js?v=3"></script>
-  <script src="js/ui.js?v=3"></script>
+  <script src="js/data.js?v=4"></script>
+  <script src="js/data_computed.js?v=4"></script>
+  <script src="js/ml-models.js?v=4"></script>
+  <script src="js/ml-engine.js?v=4"></script>
+  <script src="js/charts.js?v=4"></script>
+  <script src="js/ui.js?v=4"></script>
 
   <!-- Inline: Fix results empty state toggle and checkbox behavior -->
   <script>
@@ -709,6 +724,42 @@
         if (label) label.classList.toggle('checked', e.target.checked);
       }
     });
+  </script>
+
+  <!-- Auth Guard: redirect to login if not authenticated -->
+  <script type="module">
+    function waitForAuth() {
+      return new Promise((resolve) => {
+        if (window.ClinicalAuth) return resolve();
+        const check = setInterval(() => {
+          if (window.ClinicalAuth) { clearInterval(check); resolve(); }
+        }, 50);
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+      });
+    }
+
+    await waitForAuth();
+
+    if (window.ClinicalAuth) {
+      window.ClinicalAuth.requireAuth((user) => {
+        // Show user info in navbar
+        const chip = document.getElementById('nav-user-chip');
+        const avatar = document.getElementById('nav-user-avatar');
+        const nameEl = document.getElementById('nav-user-name');
+
+        if (chip) {
+          chip.style.display = 'flex';
+          const displayName = user.displayName || user.email.split('@')[0];
+          nameEl.textContent = displayName;
+          avatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        // Logout button handler
+        document.getElementById('nav-logout-btn')?.addEventListener('click', () => {
+          window.ClinicalAuth.logoutUser();
+        });
+      });
+    }
   </script>
 
 </body>

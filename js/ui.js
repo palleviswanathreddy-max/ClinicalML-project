@@ -41,7 +41,7 @@ function updateNavButtons() {
 // ── Form Validation ──────────────────────────────────────────────────────────
 function validateStep(step) {
   const required = {
-    1: ['age', 'gender'],
+    1: ['patient_name', 'age', 'gender'],
     2: [],
     3: ['bmi', 'glucose', 'ldl', 'hdl', 'systolic', 'diastolic'],
     4: ['activity_level']
@@ -74,6 +74,7 @@ function collectFormData() {
 
   return {
     // Demographics
+    patient_name: get('patient_name') || 'Unknown Patient',
     age: getNum('age'),
     gender: get('gender'),
     ethnicity: get('ethnicity'),
@@ -223,12 +224,13 @@ function renderResults(results) {
   const disease = stage1.final_disease;
 
   // ── Patient Summary Card ──
+  const displayName = results.patient.patient_name || `${results.patient.gender === 'male' ? 'Male' : 'Female'} Patient`;
   document.getElementById('result-patient-summary').innerHTML = `
     <div class="patient-badge">
       <span class="patient-icon">👤</span>
       <div>
-        <div class="patient-name">${results.patient.gender === 'male' ? 'Male' : 'Female'} Patient, Age ${results.patient.age}</div>
-        <div class="patient-meta">BMI: ${results.patient.bmi} · Glucose: ${results.patient.glucose} mg/dL · BP: ${results.patient.systolic}/${results.patient.diastolic} mmHg</div>
+        <div class="patient-name">${displayName}</div>
+        <div class="patient-meta">Age: ${results.patient.age} · BMI: ${results.patient.bmi} · Glucose: ${results.patient.glucose} mg/dL · BP: ${results.patient.systolic}/${results.patient.diastolic} mmHg</div>
       </div>
     </div>
   `;
@@ -609,7 +611,7 @@ function exportResults() {
     </head>
     <body>
       <h1>ClinicalML — Patient Analysis Report</h1>
-      <p>Generated: ${new Date().toLocaleString()}</p>
+      <p><strong>Patient:</strong> ${patient.patient_name || 'N/A'} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString()}</p>
 
       <h2>Patient Summary</h2>
       <table>
