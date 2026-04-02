@@ -1,0 +1,58 @@
+{
+  "feature_names": [
+    "age",
+    "gender_enc",
+    "bmi",
+    "blood_glucose",
+    "hypertension",
+    "heart_disease_history",
+    "smoking_enc"
+  ],
+  "class_names": [
+    "t2dm",
+    "hypertension",
+    "cvd",
+    "stroke",
+    "metabolic",
+    "obesity",
+    "healthy"
+  ],
+  "scaler": {
+    "mean": [
+      53.918679,
+      0.449265,
+      30.482095,
+      147.454699,
+      0.299576,
+      0.170862,
+      0.428536
+    ],
+    "scale": [
+      19.85973,
+      0.497419,
+      7.194172,
+      51.639262,
+      0.458072,
+      0.376388,
+      0.683723
+    ]
+  },
+  "metrics": {
+    "rf": {
+      "accuracy": 0.8512,
+      "f1": 0.8316
+    },
+    "gb": {
+      "accuracy": 0.8764,
+      "f1": 0.8696
+    },
+    "mlp": {
+      "accuracy": 0.836,
+      "f1": 0.8141
+    },
+    "ensemble": {
+      "accuracy": 0.8648,
+      "f1": 0.8516
+    }
+  }
+}

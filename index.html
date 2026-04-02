@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClinicalML — AI Drug & Diet Recommendation System</title>
+  <meta name="description"
+    content="ML-powered personalized drug and diet recommendation system for Phase 1 clinical trials. Uses DNN + ensemble learning for disease classification and dual recommendations." />
+  <meta name="keywords"
+    content="Machine Learning, Drug Discovery, Clinical Trials, Deep Neural Network, Personalized Medicine, Diet Recommendation" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Particles Background -->
+  <canvas id="particles-canvas" width="1" height="1"></canvas>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Running ML Pipeline…</div>
+    <div class="loading-steps">
+      <div class="loading-step">🧠 Stage 1 — Feature extraction &amp; normalization</div>
+      <div class="loading-step">🔬 Running DNN with batch normalization…</div>
+      <div class="loading-step">🌲 Ensemble: RF + Gradient Boosting (soft voting)…</div>
+      <div class="loading-step">💊 Stage 2 — Generating dual recommendations…</div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <div class="app-wrapper">
+
+    <!-- ── Navigation ── -->
+    <nav>
+      <div class="nav-brand">
+        <div class="nav-brand-icon">🧬</div>
+        <span class="nav-brand-text">ClinicalML</span>
+      </div>
+
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab" data-section="hero-section" role="tab">Overview</button>
+        <button class="nav-tab" data-section="input-section" role="tab">Patient Input</button>
+        <button class="nav-tab" data-section="results-section" role="tab">Results</button>
+        <button class="nav-tab" data-section="eda-section" role="tab">EDA</button>
+        <button class="nav-tab" data-section="importance-section" role="tab">Feature Importance</button>
+      </div>
+
+      <div class="nav-badge">
+        <div class="nav-badge-dot"></div>
+        Phase 1 Trial System
+      </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- HERO SECTION -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <section id="hero-section" class="app-section active">
+      <div class="hero">
+        <div class="hero-eyebrow">
+          <span>🔬</span> Machine Learning · Clinical Trial Enhancement
+        </div>
+
+        <h1>
+          <span class="gradient-text">Personalized Drug &amp; Diet</span><br />
+          Recommendations for Phase 1 Trials
+        </h1>
+
+        <p class="hero-sub">
+          A two-stage ML pipeline combining Deep Neural Networks and ensemble learning
+          to classify disease type and simultaneously recommend optimal diet plans and
+          drug classes — reducing trial failure rates with data-driven precision.
+        </p>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">2-Stage</div>
+            <div class="hero-stat-label">ML Pipeline</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">4 Models</div>
+            <div class="hero-stat-label">DNN + RF + GB + Ensemble</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">6 Classes</div>
+            <div class="hero-stat-label">Disease Classification</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">14 Features</div>
+            <div class="hero-stat-label">Clinical Parameters</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">Dual</div>
+            <div class="hero-stat-label">Diet + Drug Output</div>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button id="cta-btn" class="btn btn-primary btn-lg" onclick="showSection('input-section')">
+            🚀 Analyze Patient
+          </button>
+          <button class="btn btn-secondary btn-lg" onclick="showSection('eda-section')">
+            📊 View EDA
+          </button>
+        </div>
+
+        <!-- Mini feature importance preview -->
+        <div class="hero-chart-preview">
+          <h3>📈 Feature Importance — Drug Recommendation Model</h3>
+          <div class="chart-container" style="height: 280px;">
+            <canvas id="hero-importance-canvas" width="400" height="280"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Diagram -->
+      <div class="main-content" style="padding-top: 0">
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+          <div class="glass-card" style="padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📝</div>
+            <div style="font-family: Outfit, sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">
+              Patient Input</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">Demographics, physiological
+              parameters, lifestyle factors — 14 clinical features total</div>
+          </div>
+          <div class="glass-card" style="padding: 1.5rem; text-align: center; border-color: rgba(124,58,237,0.3);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🧠</div>
+            <div style="font-family: Outfit, sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">
+              Stage 1: Classification</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">DNN (BN + L2 + Dropout) + RF +
+              Gradient Boosting ensemble with soft voting</div>
+          </div>
+          <div class="glass-card" style="padding: 1.5rem; text-align: center; border-color: rgba(6,182,212,0.3);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">💊</div>
+            <div style="font-family: Outfit, sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">
+              Stage 2: Recommendations</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">Dual RF models for optimal diet
+              plan and drug class with confidence scores</div>
+          </div>
+        </div>
+
+        <!-- Abstract excerpt -->
+        <div class="glass-card" style="padding: 2rem;">
+          <div
+            style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary-light); margin-bottom: 0.75rem;">
+            Abstract</div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+            This system presents a ML-based architecture designed to enhance the success rate of Phase 1 clinical trials
+            by providing personalized diet and drug recommendations. The two-stage pipeline employs a Deep Neural
+            Network with Batch Normalization, L2 regularization, and Dropout, complemented by an ensemble of Random
+            Forest and Gradient Boosting classifiers using soft voting.
+          </p>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8;">
+            A dual-output recommendation engine simultaneously predicts the optimal diet plan and suitable drug class,
+            each providing confidence scores. The system includes EDA with correlation analysis and feature importance
+            visualization highlighting the most influential clinical parameters.
+          </p>
+          <div style="margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Machine
+              Learning</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Drug
+              Discovery</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Clinical
+              Trials</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Deep
+              Neural Network</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Random
+              Forest</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Gradient
+              Boosting</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Personalized
+              Medicine</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Diet
+              Recommendation</span>
+            <span
+              style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:var(--primary-light)">Drug
+              Classification</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- INPUT SECTION  -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <section id="input-section" class="app-section">
+      <div class="main-content">
+        <div class="section-header">
+          <div class="section-tag">📝 Patient Data Entry</div>
+          <h2 class="section-title">Enter Patient Parameters</h2>
+          <p class="section-desc">Provide clinical data across four categories for ML-based analysis.</p>
+        </div>
+
+        <!-- Sample patients quickload -->
+        <div class="sample-bar">
+          <span class="sample-label">Load Sample:</span>
+          <button class="sample-btn" data-sample="t2dm">🩸 T2DM Patient</button>
+          <button class="sample-btn" data-sample="hypertension">💓 Hypertension</button>
+          <button class="sample-btn" data-sample="cvd">🫀 CVD Patient</button>
+          <button class="sample-btn" data-sample="stroke">🧠 Stroke</button>
+          <button class="sample-btn" data-sample="healthy">✅ Healthy Control</button>
+        </div>
+
+        <!-- Step Progress -->
+        <div class="step-progress" role="list" aria-label="Form steps">
+          <div class="step-indicator active" id="step-ind-1" role="listitem">
+            <div class="step-num">1</div>
+            <span class="step-label">Demographics</span>
+          </div>
+          <div class="step-connector" role="presentation"></div>
+          <div class="step-indicator" id="step-ind-2" role="listitem">
+            <div class="step-num">2</div>
+            <span class="step-label">Medical History</span>
+          </div>
+          <div class="step-connector" role="presentation"></div>
+          <div class="step-indicator" id="step-ind-3" role="listitem">
+            <div class="step-num">3</div>
+            <span class="step-label">Physiological</span>
+          </div>
+          <div class="step-connector" role="presentation"></div>
+          <div class="step-indicator" id="step-ind-4" role="listitem">
+            <div class="step-num">4</div>
+            <span class="step-label">Lifestyle</span>
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding: 2rem;">
+
+          <!-- ── Step 1: Demographics ── -->
+          <div class="form-step active" id="step-1">
+            <div class="form-section-title">👤 Demographic Information</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="age">Age <span class="unit">(years)</span> *</label>
+                <input type="number" id="age" class="form-control" min="18" max="100" placeholder="e.g. 45" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gender">Gender *</label>
+                <select id="gender" class="form-control" required>
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ethnicity">Ethnicity</label>
+                <select id="ethnicity" class="form-control">
+                  <option value="">Select ethnicity</option>
+                  <option value="caucasian">Caucasian</option>
+                  <option value="african_american">African American</option>
+                  <option value="hispanic">Hispanic/Latino</option>
+                  <option value="south_asian">South Asian</option>
+                  <option value="east_asian">East Asian</option>
+                  <option value="other">Other/Mixed</option>
+                </select>
+              </div>
+            </div>
+            <div
+              style="padding: 1rem; background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.15); border-radius: var(--radius-md);">
+              <div style="font-size: 0.78rem; color: var(--accent); font-weight: 600; margin-bottom: 0.3rem;">ℹ️ Note
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">All patient data is processed locally. No
+                information is transmitted to external servers.</div>
+            </div>
+          </div>
+
+          <!-- ── Step 2: Medical History ── -->
+          <div class="form-step" id="step-2">
+            <div class="form-section-title">🏥 Medical History</div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div class="form-label" style="margin-bottom: 0.6rem;">Family History of Chronic Disease</div>
+              <div class="checkbox-group">
+                <label class="checkbox-item" for="family_history">
+                  <input type="checkbox" id="family_history" />
+                  <div class="check-icon">✓</div>
+                  <span>Family History</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div class="form-label" style="margin-bottom: 0.6rem;">Personal Disease History</div>
+              <div class="checkbox-group">
+                <label class="checkbox-item" for="history_diabetes">
+                  <input type="checkbox" id="history_diabetes" />
+                  <div class="check-icon">✓</div>
+                  <span>🩸 Diabetes</span>
+                </label>
+                <label class="checkbox-item" for="history_hypertension">
+                  <input type="checkbox" id="history_hypertension" />
+                  <div class="check-icon">✓</div>
+                  <span>💓 Hypertension</span>
+                </label>
+                <label class="checkbox-item" for="history_cvd">
+                  <input type="checkbox" id="history_cvd" />
+                  <div class="check-icon">✓</div>
+                  <span>🫀 Cardiovascular</span>
+                </label>
+                <label class="checkbox-item" for="history_metabolic">
+                  <input type="checkbox" id="history_metabolic" />
+                  <div class="check-icon">✓</div>
+                  <span>⚡ Metabolic Syndrome</span>
+                </label>
+                <label class="checkbox-item" for="history_kidney">
+                  <input type="checkbox" id="history_kidney" />
+                  <div class="check-icon">✓</div>
+                  <span>🫘 Renal Disease</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="current_meds">Current Medications</label>
+                <select id="current_meds" class="form-control">
+                  <option value="none">None</option>
+                  <option value="antihypertensive">Antihypertensives</option>
+                  <option value="statins">Statins</option>
+                  <option value="insulin">Insulin/OHAs</option>
+                  <option value="multiple">Multiple</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="allergies">Known Drug Allergies</label>
+                <select id="allergies" class="form-control">
+                  <option value="none">None known</option>
+                  <option value="sulfa">Sulfa drugs</option>
+                  <option value="penicillin">Penicillin class</option>
+                  <option value="nsaids">NSAIDs</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Physiological ── -->
+          <div class="form-step" id="step-3">
+            <div class="form-section-title">🔬 Physiological Parameters</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="bmi">BMI <span class="unit">(kg/m²)</span> *</label>
+                <input type="number" id="bmi" class="form-control" min="15" max="55" step="0.1" placeholder="e.g. 27.4"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="glucose">Fasting Glucose <span class="unit">(mg/dL)</span> *</label>
+                <input type="number" id="glucose" class="form-control" min="60" max="400" placeholder="e.g. 100"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ldl">LDL Cholesterol <span class="unit">(mg/dL)</span> *</label>
+                <input type="number" id="ldl" class="form-control" min="30" max="300" placeholder="e.g. 130" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="hdl">HDL Cholesterol <span class="unit">(mg/dL)</span> *</label>
+                <input type="number" id="hdl" class="form-control" min="20" max="120" placeholder="e.g. 55" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="systolic">Systolic BP <span class="unit">(mmHg)</span> *</label>
+                <input type="number" id="systolic" class="form-control" min="80" max="220" placeholder="e.g. 126"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="diastolic">Diastolic BP <span class="unit">(mmHg)</span> *</label>
+                <input type="number" id="diastolic" class="form-control" min="50" max="140" placeholder="e.g. 82"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="heart_rate">Heart Rate <span class="unit">(bpm)</span></label>
+                <input type="number" id="heart_rate" class="form-control" min="40" max="160" value="72"
+                  placeholder="e.g. 72" />
+              </div>
+            </div>
+
+            <!-- Reference ranges -->
+            <div
+              style="padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-md); margin-top: 0.5rem;">
+              <div
+                style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">
+                Normal Reference Ranges</div>
+              <div
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.4rem; font-size: 0.75rem; color: var(--text-muted);">
+                <span>BMI: 18.5–24.9 kg/m²</span>
+                <span>Fasting Glucose: &lt; 100 mg/dL</span>
+                <span>LDL: &lt; 100 mg/dL</span>
+                <span>HDL: &gt; 60 mg/dL</span>
+                <span>SBP: 90–120 mmHg</span>
+                <span>DBP: 60–80 mmHg</span>
+                <span>Heart Rate: 60–100 bpm</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 4: Lifestyle ── -->
+          <div class="form-step" id="step-4">
+            <div class="form-section-title">🏃 Lifestyle Factors</div>
+
+            <div class="form-grid" style="margin-bottom: 1.5rem;">
+              <div class="form-group">
+                <label class="form-label" for="smoking">Smoking Status</label>
+                <select id="smoking" class="form-control">
+                  <option value="no">Non-smoker</option>
+                  <option value="ex">Ex-smoker</option>
+                  <option value="yes">Current smoker</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="alcohol">Alcohol Consumption</label>
+                <select id="alcohol" class="form-control">
+                  <option value="none">None</option>
+                  <option value="light">Light (1–2 drinks/week)</option>
+                  <option value="moderate">Moderate (3–10/week)</option>
+                  <option value="heavy">Heavy (&gt;10/week)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="range-group" style="margin-bottom: 1.5rem;">
+              <div class="range-header">
+                <label class="form-label" for="activity_level">Physical Activity Level *</label>
+                <div class="range-val"><span id="activity_level-val">3</span></div>
+              </div>
+              <input type="range" id="activity_level" min="1" max="5" step="1" value="3" />
+              <div class="range-labels">
+                <span>Sedentary</span>
+                <span>Light</span>
+                <span>Moderate</span>
+                <span>Active</span>
+                <span>Very Active</span>
+              </div>
+            </div>
+
+            <div class="range-group" style="margin-bottom: 1.5rem;">
+              <div class="range-header">
+                <label class="form-label" for="exercise_hours">Weekly Exercise <span class="unit">(hours)</span></label>
+                <div class="range-val"><span id="exercise_hours-val">3</span></div>
+              </div>
+              <input type="range" id="exercise_hours" min="0" max="20" step="0.5" value="3" />
+              <div class="range-labels">
+                <span>0h</span>
+                <span>5h</span>
+                <span>10h</span>
+                <span>15h</span>
+                <span>20h</span>
+              </div>
+            </div>
+
+            <div
+              style="padding: 1.25rem; background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.05)); border: 1px solid rgba(124,58,237,0.2); border-radius: var(--radius-md);">
+              <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem;">🚀 Ready to Analyze</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Click "Run ML Pipeline" to get disease
+                classification and personalized recommendations.</div>
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="form-nav">
+            <button id="prev-btn" class="btn btn-ghost" type="button" style="display:none;">← Previous</button>
+            <div style="flex: 1;"></div>
+            <button id="next-btn" class="btn btn-secondary" type="button">Next Step →</button>
+            <button id="submit-btn" class="btn btn-primary" type="button" style="display:none;">🧬 Run ML
+              Pipeline</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- RESULTS SECTION -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <section id="results-section" class="app-section">
+      <div class="main-content">
+        <div class="section-header"
+          style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <div class="section-tag">📊 Analysis Results</div>
+            <h2 class="section-title">ML Pipeline Output</h2>
+            <p class="section-desc">Two-stage classification and dual recommendation results.</p>
+          </div>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <button class="btn btn-secondary" type="button" onclick="showSection('input-section')">← New
+              Patient</button>
+            <button class="btn btn-ghost" type="button" onclick="exportResults()"
+              style="border:1px solid rgba(124,58,237,0.3);">
+              📄 Export PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Patient summary -->
+        <div id="result-patient-summary"></div>
+
+        <!-- Stage 1 -->
+        <div class="glass-card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+          <div
+            style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary-light); margin-bottom: 1.25rem;">
+            Stage 1 — Disease Classification
+          </div>
+          <div id="classification-result"></div>
+          <div id="risk-factors" style="margin-top: 1.5rem;"></div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div
+          style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 1rem; padding: 0 0.25rem;">
+          Stage 2 — Dual Recommendations
+        </div>
+
+        <div class="rec-grid">
+          <!-- Diet -->
+          <div>
+            <div
+              style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.75rem; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">
+              🥗 Optimal Diet Plan
+            </div>
+            <div id="diet-recommendation"></div>
+          </div>
+          <!-- Drug -->
+          <div>
+            <div
+              style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.75rem; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">
+              💊 Drug Class
+            </div>
+            <div id="drug-recommendation"></div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="results-empty" style="text-align:center; padding: 4rem 2rem; color: var(--text-muted);">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🔬</div>
+          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">No
+            Results Yet</div>
+          <div style="font-size: 0.88rem; margin-bottom: 1.5rem;">Enter patient data and run the ML pipeline to see
+            recommendations here.</div>
+          <button class="btn btn-primary" onclick="showSection('input-section')">Enter Patient Data →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- EDA SECTION -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <section id="eda-section" class="app-section">
+      <div class="main-content">
+        <div class="section-header">
+          <div class="section-tag">📊 Exploratory Data Analysis</div>
+          <h2 class="section-title">EDA Module</h2>
+          <p class="section-desc">Correlation analysis, feature distributions, and patient-vs-population comparison.</p>
+        </div>
+
+        <div class="eda-grid" style="margin-bottom: 1.5rem;">
+          <!-- Correlation Heatmap -->
+          <div class="eda-card">
+            <div class="eda-title">🌡️ Feature Correlation Matrix</div>
+            <div class="heatmap-labels">
+              <div class="heatmap-label">BMI</div>
+              <div class="heatmap-label">Gluc</div>
+              <div class="heatmap-label">LDL</div>
+              <div class="heatmap-label">HDL</div>
+              <div class="heatmap-label">SBP</div>
+              <div class="heatmap-label">DBP</div>
+              <div class="heatmap-label">HR</div>
+              <div class="heatmap-label">Age</div>
+            </div>
+            <canvas id="correlation-canvas" width="400" height="400" style="width: 100%; border-radius: 8px;"></canvas>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center;">
+              Green = positive correlation · Red = negative correlation
+            </div>
+          </div>
+
+          <!-- Patient Radar -->
+          <div class="eda-card">
+            <div class="eda-title">🎯 Patient Risk Profile vs. Population</div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="radar-canvas" width="400" height="280"></canvas>
+            </div>
+            <div id="radar-hint"
+              style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+              Run an analysis first to see patient-specific radar chart
+            </div>
+          </div>
+        </div>
+
+        <!-- Distribution -->
+        <div class="eda-card">
+          <div class="eda-title">📊 BMI Distribution — Population Histogram</div>
+          <div class="chart-container" style="height: 260px;">
+            <canvas id="distribution-canvas" width="800" height="260"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- FEATURE IMPORTANCE SECTION -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <section id="importance-section" class="app-section">
+      <div class="main-content">
+        <div class="section-header">
+          <div class="section-tag">🔍 Model Interpretability</div>
+          <h2 class="section-title">Feature Importance Analysis</h2>
+          <p class="section-desc">Most influential clinical parameters in the drug recommendation model, ranked by Gini
+            importance.</p>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex; gap:1.25rem; flex-wrap:wrap; margin-bottom: 1.5rem;">
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-muted);">
+            <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,58,237,0.75)"></div> Physiological
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-muted);">
+            <div style="width:12px;height:12px;border-radius:3px;background:rgba(6,182,212,0.75)"></div> Demographic
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-muted);">
+            <div style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,0.75)"></div> Lifestyle
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-muted);">
+            <div style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,0.75)"></div> Medical
+            History
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+          <!-- Chart -->
+          <div class="glass-card" style="padding: 1.5rem;">
+            <div class="chart-container" style="height: 420px;">
+              <canvas id="importance-canvas" width="400" height="420"></canvas>
+            </div>
+          </div>
+
+          <!-- Ranked List -->
+          <div class="glass-card" style="padding: 1.5rem;">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem;">
+              Ranked Clinical Parameters
+            </div>
+            <div id="importance-list"></div>
+          </div>
+        </div>
+
+        <!-- Insight -->
+        <div class="glass-card" style="padding: 1.5rem; margin-top: 1.5rem; border-color: rgba(124,58,237,0.2);">
+          <div style="font-size: 0.82rem; font-weight: 600; color: var(--primary-light); margin-bottom: 0.75rem;">💡 Key
+            Insights</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem;">
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              <strong style="color:var(--text-primary)">Blood Glucose</strong> is the strongest predictor (18.7%),
+              driving diabetes and metabolic disease classification.
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              <strong style="color:var(--text-primary)">BMI</strong> ranks second (16.3%), significantly impacting both
+              disease classification and drug selection.
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              <strong style="color:var(--text-primary)">LDL Cholesterol</strong> (14.2%) is the primary driver for
+              statin-class drug recommendation.
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              <strong style="color:var(--text-primary)">Lifestyle factors</strong> combined contribute 11.8%,
+              highlighting importance of modifiable behaviors.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /.app-wrapper -->
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=3"></script>
+  <script src="js/data_computed.js?v=3"></script>
+  <script src="js/ml-models.js?v=3"></script>
+  <script src="js/ml-engine.js?v=3"></script>
+  <script src="js/charts.js?v=3"></script>
+  <script src="js/ui.js?v=3"></script>
+
+  <!-- Inline: Fix results empty state toggle and checkbox behavior -->
+  <script>
+    // Patch renderResults to hide empty state — must run after ui.js defines the function
+    document.addEventListener('DOMContentLoaded', () => {
+      const origRender = window.renderResults || renderResults;
+      window.renderResults = function (results) {
+        const empty = document.getElementById('results-empty');
+        if (empty) empty.style.display = 'none';
+        origRender(results);
+      };
+    });
+
+    // Checkbox toggle: sync .checked class with checkbox state
+    document.addEventListener('change', e => {
+      if (e.target.type === 'checkbox') {
+        const label = e.target.closest('.checkbox-item');
+        if (label) label.classList.toggle('checked', e.target.checked);
+      }
+    });
+  </script>
+
+</body>
+
+</html>
