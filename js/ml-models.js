@@ -19,11 +19,27 @@ class RealModelEngine {
     if (this.loaded) return;
     console.time('Model loading');
 
+    // Cache-busting to avoid stale HTML responses from previous SPA config
+    const cacheBust = `?v=${Date.now()}`;
+    const fetchJSON = async (url) => {
+      const resp = await fetch(url + cacheBust, { cache: 'no-cache' });
+      if (!resp.ok) throw new Error(`Failed to fetch ${url}: HTTP ${resp.status}`);
+      const contentType = resp.headers.get('content-type') || '';
+      if (!contentType.includes('json') && !contentType.includes('octet')) {
+        const text = await resp.text();
+        if (text.trimStart().startsWith('<')) {
+          throw new Error(`${url} returned HTML instead of JSON. Clear browser cache and reload.`);
+        }
+        return JSON.parse(text);
+      }
+      return resp.json();
+    };
+
     const [rfData, gbData, dnnData, meta] = await Promise.all([
-      fetch('models/rf_model.json').then(r => r.json()),
-      fetch('models/gb_model.json').then(r => r.json()),
-      fetch('models/dnn_weights.json').then(r => r.json()),
-      fetch('models/metadata.json').then(r => r.json())
+      fetchJSON('models/rf_model.json'),
+      fetchJSON('models/gb_model.json'),
+      fetchJSON('models/dnn_weights.json'),
+      fetchJSON('models/metadata.json')
     ]);
 
     this.rf = rfData;

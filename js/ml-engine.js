@@ -439,7 +439,12 @@ class MLEngine {
     }
 
     // Load real trained models on first call
-    await realModels.loadModels();
+    try {
+      await realModels.loadModels();
+    } catch (loadErr) {
+      console.error('Model loading failed:', loadErr);
+      throw new Error('Failed to load ML models. Please hard-refresh (Ctrl+Shift+R) and try again. Error: ' + loadErr.message);
+    }
 
     // Brief processing delay for UX
     await new Promise(r => setTimeout(r, 1200));
