@@ -51,18 +51,29 @@ function getErrorMessage(error) {
 
 // ── Auth Functions ───────────────────────────────────────────────────────────
 
+// Helper to prevent Firestore from hanging indefinitely if DB isn't created
+const withTimeout = (promise, ms = 3000) => 
+  Promise.race([
+    promise, 
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore timeout")), ms))
+  ]);
+
 /** Register a new user with email, password, display name, and role */
 async function registerUser(email, password, displayName, role = 'user') {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName });
   
-  // Store role in Firestore
-  await setDoc(doc(db, "users", cred.user.uid), {
-    displayName: displayName,
-    email: email,
-    role: role,
-    createdAt: new Date().toISOString()
-  });
+  // Store role in Firestore safely without locking the UI indefinitely
+  try {
+    await withTimeout(setDoc(doc(db, "users", cred.user.uid), {
+      displayName: displayName,
+      email: email,
+      role: role,
+      createdAt: new Date().toISOString()
+    }), 3000);
+  } catch (e) {
+    console.warn("Could not save role to Firestore. DB might be uninitialized.", e);
+  }
   
   return cred.user;
 }
@@ -70,7 +81,7 @@ async function registerUser(email, password, displayName, role = 'user') {
 /** Get custom user profile data from Firestore */
 async function getUserProfile(uid) {
   try {
-    const docSnap = await getDoc(doc(db, "users", uid));
+    const docSnap = await withTimeout(getDoc(doc(db, "users", uid)), 2000);
     if (docSnap.exists()) {
       return docSnap.data();
     }
@@ -109,14 +120,14 @@ async function savePatientResult(patientData, results) {
   if (!user) return; // Only save if logged in
   
   try {
-    await addDoc(collection(db, "patient_results"), {
+    await withTimeout(addDoc(collection(db, "patient_results"), {
       userId: user.uid,
       patientData: patientData,
       results: results,
       createdAt: new Date().toISOString()
-    });
+    }), 3000);
   } catch (e) {
-    console.error("Error saving patient result:", e);
+    console.error("Error saving patient result (DB might be uninitialized):", e);
   }
 }
 
