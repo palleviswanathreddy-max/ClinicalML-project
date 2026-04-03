@@ -1248,26 +1248,66 @@ input[type="range"]::-webkit-slider-thumb:hover {
   margin-top: 0.2rem;
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+/* ─── Enhanced Mobile Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .nav-brand-text { display: none; }
+}
+
 @media (max-width: 768px) {
-  nav { padding: 0 1rem; }
-  .nav-tabs { gap: 0; }
-  .nav-tab { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
-  .hero { padding: 3rem 1rem 2rem; }
+  nav { 
+    flex-wrap: wrap; 
+    height: auto; 
+    padding: 0.75rem 1rem 0; 
+  }
+  .nav-brand-text { display: block; }
+
+  .nav-brand, .nav-user-area {
+    margin-bottom: 0.75rem;
+  }
+
+  .nav-tabs { 
+    width: 100%; 
+    overflow-x: auto; 
+    padding-bottom: 0.75rem;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tabs { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .nav-tab { padding: 0.4rem 0.8rem; font-size: 0.82rem; flex-shrink: 0; }
+  
+  .hero { padding: 2rem 1rem 2rem; }
+  .hero h1 { font-size: 2.2rem; }
   .hero-stats { gap: 0.75rem; }
+  .hero-stat { width: 45%; flex-grow: 1; padding: 0.8rem; }
+  
+  .glass-card { padding: 1.25rem !important; }
+  
   .model-results-grid { grid-template-columns: 1fr 1fr; }
   .rec-grid { grid-template-columns: 1fr; }
   .eda-grid { grid-template-columns: 1fr; }
   .rec-details-grid { grid-template-columns: 1fr; }
+  
+  .step-progress { transform: scale(0.9); }
   .step-indicator .step-label { display: none; }
   .form-grid-2 { grid-template-columns: 1fr; }
   .nav-badge { display: none; }
 }
 
 @media (max-width: 480px) {
-  .disease-banner { flex-direction: column; text-align: center; }
+  .hero h1 { font-size: 1.8rem; }
+  .disease-banner { flex-direction: column; text-align: center; gap: 1rem; }
   .model-results-grid { grid-template-columns: 1fr; }
-  .step-progress { gap: 0; }
+  .step-connector { width: 20px; }
+  
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-actions .btn { width: 100%; justify-content: center; }
+  
+  .form-nav { flex-direction: column-reverse; gap: 1rem; }
+  .form-nav .btn { width: 100%; justify-content: center; }
+  
+  .range-labels span { font-size: 0.6rem; }
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
@@ -1358,7 +1398,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* ── Responsive: User Area ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .nav-user-name { display: none; }
-  .nav-user-chip { padding: 0.25rem; }
-  .nav-user-area { gap: 0.4rem; }
+  .nav-user-chip { padding: 0.25rem; border-radius: 50%; }
+  .nav-user-area { gap: 0.4rem; margin-bottom: 0.75rem; }
 }
 

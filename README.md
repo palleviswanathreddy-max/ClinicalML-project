@@ -48,21 +48,33 @@ c:\Users\Lenovo\Drug_project\
     └── requirements.txt     # Python requirements (scikit-learn, pandas, numpy)
 ```
 
-## 🚀 How to Run the Application
+## 🌐 Live URLs
 
-Because ClinicalML uses lightweight JSON representations of models, you do not need an active Python backend. The application is configured to be deployed on Firebase Hosting and can also be run locally via a basic static HTTP server.
+The application is deployed and live on the internet!
+- **GitHub Pages**: [https://palleviswanathreddy-max.github.io/ClinicalML-project/](https://palleviswanathreddy-max.github.io/ClinicalML-project/)
+- **Vercel**: Live and automatically synced (check your Vercel dashboard for the exact URL).
 
-### Running Locally (Firebase)
-1. Install Firebase CLI: `npm install -g firebase-tools`
-2. Run the local emulator: `firebase emulators:start --only hosting`
-3. Open your browser and navigate to the provided localhost URL (e.g., `http://localhost:5000`).
+## 🚀 How to PUSH and DEPLOY Updates
 
-### Running Locally (Static Server)
-1.  Navigate into the project directory.
-2.  Start a static server. You can use npx, Python, or Live Server:
-    *   **Node.js:** `npx serve . --listen 3030`
-    *   **Python:** `python -m http.server 3030`
-3.  Open your browser and navigate to `http://localhost:3030`.
+We have configured a fully automated CI/CD pipeline. Whenever you modify the application code or data:
+1. Double click the **`deploy.bat`** file from your file explorer (or simply run `.\deploy.bat` in the terminal).
+2. Enter a commit message describing what you changed.
+3. The file will automatically commit everything to GitHub. This triggers an immediate, automatic re-deployment to your live **Vercel** and **GitHub Pages** URLs.
+
+## 💻 How to Run the Application Locally
+
+Because ClinicalML uses lightweight JSON representations of models natively in-browser, you do not need a backend API. 
+
+### Run with Python (Standard)
+1. Navigate into the project directory in your terminal.
+2. Start the python server: `python -m http.server 3030`
+3. Open your browser and navigate to: `http://localhost:3030`
+
+### Run with Node.js
+If you prefer NPM:
+1. Open terminal in the project directory.
+2. Run: `npx serve . --listen 3030`
+3. Open your browser and navigate to: `http://localhost:3030`
 
 ## 🧠 Retraining the Machine Learning Models
 
