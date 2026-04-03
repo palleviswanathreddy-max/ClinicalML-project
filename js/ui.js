@@ -225,12 +225,48 @@ function renderResults(results) {
 
   // ── Patient Summary Card ──
   const displayName = results.patient.patient_name || `${results.patient.gender === 'male' ? 'Male' : 'Female'} Patient`;
+  
+  // Format med history cleanly
+  const hx = [];
+  if (results.patient.history_diabetes) hx.push('Diabetes');
+  if (results.patient.history_hypertension) hx.push('Hypertension');
+  if (results.patient.history_cvd) hx.push('CVD');
+  if (results.patient.history_metabolic) hx.push('Metabolic Synd.');
+  if (results.patient.history_kidney) hx.push('Renal Disease');
+  const hxStr = hx.length > 0 ? hx.join(', ') : 'None significant';
+
   document.getElementById('result-patient-summary').innerHTML = `
-    <div class="patient-badge">
-      <span class="patient-icon">👤</span>
-      <div>
-        <div class="patient-name">${displayName}</div>
-        <div class="patient-meta">Age: ${results.patient.age} · BMI: ${results.patient.bmi} · Glucose: ${results.patient.glucose} mg/dL · BP: ${results.patient.systolic}/${results.patient.diastolic} mmHg</div>
+    <div class="patient-badge" style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start; padding:1.25rem;">
+      <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+        <span class="patient-icon">👤</span>
+        <div style="flex:1;">
+          <div class="patient-name" style="font-size:1.1rem;">${displayName}</div>
+          <div class="patient-meta">Age: ${results.patient.age} · Gender: ${results.patient.gender.charAt(0).toUpperCase() + results.patient.gender.slice(1)}</div>
+        </div>
+      </div>
+      
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; width:100%; margin-top:0.5rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+        <div style="font-size:0.8rem;">
+          <div style="color:var(--text-muted); font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.05em;">Physiological</div>
+          <div>BMI: <strong>${results.patient.bmi}</strong> kg/m²</div>
+          <div>Glucose: <strong>${results.patient.glucose}</strong> mg/dL</div>
+          <div>BP: <strong>${results.patient.systolic}/${results.patient.diastolic}</strong> mmHg</div>
+          <div>Chol: LDL <strong>${results.patient.ldl}</strong> / HDL <strong>${results.patient.hdl}</strong></div>
+        </div>
+        <div style="font-size:0.8rem;">
+          <div style="color:var(--text-muted); font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.05em;">Medical History</div>
+          <div>History: <strong>${hxStr}</strong></div>
+          <div>Family Hx: <strong>${results.patient.family_history ? 'Yes' : 'No'}</strong></div>
+          <div>Current Meds: <strong style="text-transform:capitalize;">${results.patient.current_meds}</strong></div>
+          <div>Allergies: <strong style="text-transform:capitalize;">${results.patient.allergies}</strong></div>
+        </div>
+        <div style="font-size:0.8rem;">
+          <div style="color:var(--text-muted); font-weight:600; margin-bottom:0.2rem; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.05em;">Lifestyle</div>
+          <div>Smoking: <strong style="text-transform:capitalize;">${results.patient.smoking}</strong></div>
+          <div>Alcohol: <strong style="text-transform:capitalize;">${results.patient.alcohol}</strong></div>
+          <div>Activity (1-5): <strong>${results.patient.activity_level}</strong></div>
+          <div>Exercise: <strong>${results.patient.exercise_hours} hrs/wk</strong></div>
+        </div>
       </div>
     </div>
   `;
@@ -562,9 +598,15 @@ async function handleSubmit() {
 
   try {
     const results = await mlEngine.predict(patientData);
+    
+    // Save to Firestore if Auth is available
+    if (window.ClinicalAuth && window.ClinicalAuth.savePatientResult) {
+      await window.ClinicalAuth.savePatientResult(patientData, results);
+    }
+
     hideLoading();
     renderResults(results);
-    showToast('Analysis complete! Recommendations generated.', 'success');
+    showToast('Analysis complete & saved remotely!', 'success');
   } catch (err) {
     hideLoading();
     console.error(err);

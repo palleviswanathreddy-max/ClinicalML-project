@@ -741,7 +741,7 @@
     await waitForAuth();
 
     if (window.ClinicalAuth) {
-      window.ClinicalAuth.requireAuth((user) => {
+      window.ClinicalAuth.requireAuth(async (user) => {
         // Show user info in navbar
         const chip = document.getElementById('nav-user-chip');
         const avatar = document.getElementById('nav-user-avatar');
@@ -750,7 +750,12 @@
         if (chip) {
           chip.style.display = 'flex';
           const displayName = user.displayName || user.email.split('@')[0];
-          nameEl.textContent = displayName;
+          
+          // Fetch role from Firestore
+          const profile = await window.ClinicalAuth.getUserProfile(user.uid);
+          const roleDisplay = profile && profile.role ? ` [${profile.role.toUpperCase()}]` : '';
+          
+          nameEl.textContent = displayName + roleDisplay;
           avatar.textContent = displayName.charAt(0).toUpperCase();
         }
 

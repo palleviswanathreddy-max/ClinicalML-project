@@ -501,6 +501,18 @@
         </div>
 
         <div class="auth-field">
+          <label class="auth-label" for="reg-role">Role</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">⚕️</span>
+            <select id="reg-role" class="auth-input" required style="appearance: none; cursor: pointer;">
+              <option value="user">User</option>
+              <option value="clinical">Clinical Researcher</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="auth-field">
           <label class="auth-label" for="reg-password">Password</label>
           <div class="auth-input-wrap">
             <span class="auth-input-icon">🔒</span>
@@ -645,6 +657,7 @@
 
       const name = document.getElementById('reg-name').value.trim();
       const email = document.getElementById('reg-email').value.trim();
+      const role = document.getElementById('reg-role').value;
       const password = document.getElementById('reg-password').value;
       const confirm = document.getElementById('reg-confirm').value;
       const btn = document.getElementById('register-btn');
@@ -665,7 +678,7 @@
 
       setLoading(btn, true);
       try {
-        await Auth.registerUser(email, password, name);
+        await Auth.registerUser(email, password, name, role);
         showMessage('Account created! Redirecting…', 'success');
         setTimeout(() => { window.location.href = 'index.html'; }, 800);
       } catch (err) {

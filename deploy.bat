@@ -15,7 +15,7 @@ echo Committing with message: "%commit_msg%"
 git commit -m "%commit_msg%"
 
 echo.
-echo Pushing to GitHub (this will auto-trigger Vercel & GitHub Pages)...
+echo Pushing to GitHub (this will auto-trigger Vercel ^& GitHub Pages)...
 git push origin main
 
 echo.

@@ -14,10 +14,19 @@ import {
   onAuthStateChanged,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 // ── Initialize Firebase ──────────────────────────────────────────────────────
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // ── Friendly Error Messages ──────────────────────────────────────────────────
@@ -42,11 +51,33 @@ function getErrorMessage(error) {
 
 // ── Auth Functions ───────────────────────────────────────────────────────────
 
-/** Register a new user with email, password, and display name */
-async function registerUser(email, password, displayName) {
+/** Register a new user with email, password, display name, and role */
+async function registerUser(email, password, displayName, role = 'user') {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName });
+  
+  // Store role in Firestore
+  await setDoc(doc(db, "users", cred.user.uid), {
+    displayName: displayName,
+    email: email,
+    role: role,
+    createdAt: new Date().toISOString()
+  });
+  
   return cred.user;
+}
+
+/** Get custom user profile data from Firestore */
+async function getUserProfile(uid) {
+  try {
+    const docSnap = await getDoc(doc(db, "users", uid));
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (e) {
+    console.warn("Could not fetch user profile", e);
+  }
+  return null;
 }
 
 /** Sign in with email and password */
@@ -70,6 +101,23 @@ async function logoutUser() {
 /** Get the currently signed-in user (or null) */
 function getCurrentUser() {
   return auth.currentUser;
+}
+
+/** Save patient result to Firestore */
+async function savePatientResult(patientData, results) {
+  const user = auth.currentUser;
+  if (!user) return; // Only save if logged in
+  
+  try {
+    await addDoc(collection(db, "patient_results"), {
+      userId: user.uid,
+      patientData: patientData,
+      results: results,
+      createdAt: new Date().toISOString()
+    });
+  } catch (e) {
+    console.error("Error saving patient result:", e);
+  }
 }
 
 // ── Auth State Observer ──────────────────────────────────────────────────────
@@ -122,5 +170,8 @@ window.ClinicalAuth = {
   watchAuthState,
   requireAuth,
   redirectIfLoggedIn,
-  getErrorMessage
+  getErrorMessage,
+  getUserProfile,
+  savePatientResult,
+  db
 };
