@@ -22,8 +22,13 @@ In Stage 1, the system uses an ensemble of **real machine learning models** trai
 ## 📂 Project Structure
 
 ```
-c:\Users\janak\Drug_project\
+c:\Users\Lenovo\Drug_project\
 ├── index.html               # Main application and UI layout
+├── login.html               # Login page for authentication
+├── firebase.json            # Firebase hosting configuration
+├── .firebase/               # Firebase local setup
+├── .venv/                   # Python virtual environment
+├── datasets/                # CSV datasets for training containing real world data
 ├── css/
 │   └── index.css            # Modern glassmorphism design system
 ├── js/
@@ -45,8 +50,14 @@ c:\Users\janak\Drug_project\
 
 ## 🚀 How to Run the Application
 
-Because ClinicalML uses lightweight JSON representations of models, you do not need an active Python backend. You only need a basic static HTTP server to host the HTML/JS.
+Because ClinicalML uses lightweight JSON representations of models, you do not need an active Python backend. The application is configured to be deployed on Firebase Hosting and can also be run locally via a basic static HTTP server.
 
+### Running Locally (Firebase)
+1. Install Firebase CLI: `npm install -g firebase-tools`
+2. Run the local emulator: `firebase emulators:start --only hosting`
+3. Open your browser and navigate to the provided localhost URL (e.g., `http://localhost:5000`).
+
+### Running Locally (Static Server)
 1.  Navigate into the project directory.
 2.  Start a static server. You can use npx, Python, or Live Server:
     *   **Node.js:** `npx serve . --listen 3030`
@@ -57,10 +68,11 @@ Because ClinicalML uses lightweight JSON representations of models, you do not n
 
 If you wish to augment the initial data or modify the model architecture, you can retrain the models:
 
-1. Ensure you have the raw CSV clinical data in the root directory:
+1. Ensure you have the raw CSV clinical data in the `datasets/` directory:
    - `diabetes_prediction_dataset.csv`
    - `healthcare-dataset-stroke-data.csv`
-2. Navigate to the `training` directory and install the requirements:
+   - `heart_cleveland_upload.csv`
+2. Navigate to the `training` directory and install the requirements (a virtual environment like `.venv` is recommended):
    ```bash
    cd training
    pip install -r requirements.txt

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClinicalML — Sign In</title>
+  <meta name="description" content="Sign in to access the ClinicalML AI drug and diet recommendation system." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a1a;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(124, 58, 237, 0.5);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --primary-dark: #5b21b6;
+      --accent: #06b6d4;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.08);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Particle Canvas ──────────────────────────────────────────────────── */
+    #particles-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Gradient Orbs ────────────────────────────────────────────────────── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      z-index: 0;
+      pointer-events: none;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 400px; height: 400px; background: #7c3aed; top: -100px; left: -100px; }
+    .orb-2 { width: 350px; height: 350px; background: #06b6d4; bottom: -80px; right: -80px; animation-delay: -4s; }
+    .orb-3 { width: 200px; height: 200px; background: #a78bfa; top: 50%; right: 15%; animation-delay: -8s; }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -20px) scale(1.08); }
+      100% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+
+    /* ── Auth Container ───────────────────────────────────────────────────── */
+    .auth-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      padding: 1rem;
+    }
+
+    /* ── Brand Header ─────────────────────────────────────────────────────── */
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-brand-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .auth-brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #7c3aed, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .auth-brand-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Glass Card ───────────────────────────────────────────────────────── */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2rem;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: border-color 0.3s ease;
+    }
+    .auth-card:hover {
+      border-color: rgba(124, 58, 237, 0.15);
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────────────────────── */
+    .auth-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 1.75rem;
+      position: relative;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .auth-tab.active {
+      color: var(--text-primary);
+      background: rgba(124, 58, 237, 0.15);
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+    }
+    .auth-tab:hover:not(.active) {
+      color: var(--text-secondary);
+    }
+
+    /* ── Auth Forms ───────────────────────────────────────────────────────── */
+    .auth-form {
+      display: none;
+      animation: fadeSlideIn 0.35s ease;
+    }
+    .auth-form.active { display: block; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Form Controls ────────────────────────────────────────────────────── */
+    .auth-field {
+      margin-bottom: 1.1rem;
+    }
+    .auth-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.02em;
+    }
+    .auth-input-wrap {
+      position: relative;
+    }
+    .auth-input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      opacity: 0.5;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 0.7rem 0.85rem 0.7rem 2.5rem;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .auth-input::placeholder {
+      color: var(--text-muted);
+    }
+    .auth-input:focus {
+      border-color: var(--border-focus);
+      background: var(--surface-hover);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    .auth-input:focus ~ .auth-input-icon {
+      opacity: 1;
+    }
+    .auth-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Password toggle */
+    .auth-pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px;
+      transition: color 0.2s;
+    }
+    .auth-pw-toggle:hover { color: var(--text-primary); }
+
+    /* ── Buttons ──────────────────────────────────────────────────────────── */
+    .auth-btn {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      color: white;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .auth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+    }
+    .auth-btn:active {
+      transform: translateY(0);
+    }
+    .auth-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Spinner inside button */
+    .auth-btn .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+    .auth-btn.loading .spinner { display: inline-block; }
+    .auth-btn.loading .btn-text { opacity: 0.7; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Divider ──────────────────────────────────────────────────────────── */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Google Button ────────────────────────────────────────────────────── */
+    .auth-google-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.7rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .auth-google-btn:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .auth-google-btn:active { transform: translateY(0); }
+    .auth-google-btn svg { width: 18px; height: 18px; }
+
+    /* ── Error / Success Message ───────────────────────────────────────────── */
+    .auth-message {
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      line-height: 1.5;
+      animation: fadeSlideIn 0.25s ease;
+    }
+    .auth-message.show { display: flex; }
+    .auth-message.error {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    .auth-message.success {
+      background: var(--success-bg);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .auth-footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+    }
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Password Strength ────────────────────────────────────────────────── */
+    .pw-strength {
+      margin-top: 0.4rem;
+      height: 3px;
+      border-radius: 3px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .pw-strength-bar {
+      height: 100%;
+      width: 0;
+      border-radius: 3px;
+      transition: width 0.3s, background 0.3s;
+    }
+    .pw-strength-text {
+      font-size: 0.7rem;
+      margin-top: 0.25rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .auth-container { padding: 0.75rem; }
+      .auth-card { padding: 1.5rem; }
+      .auth-brand-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background effects -->
+  <canvas id="particles-canvas"></canvas>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="auth-container">
+    <!-- Brand -->
+    <div class="auth-brand">
+      <div class="auth-brand-icon">🧬</div>
+      <div class="auth-brand-title">ClinicalML</div>
+      <div class="auth-brand-sub">AI-Powered Drug & Diet Recommendation System</div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" data-tab="login" id="tab-login" role="tab" aria-selected="true">Sign In</button>
+        <button class="auth-tab" data-tab="register" id="tab-register" role="tab" aria-selected="false">Create Account</button>
+      </div>
+
+      <!-- Error/Success message (shared) -->
+      <div class="auth-message" id="auth-message" role="alert">
+        <span id="auth-message-icon"></span>
+        <span id="auth-message-text"></span>
+      </div>
+
+      <!-- ── Login Form ────────────── -->
+      <form class="auth-form active" id="login-form" autocomplete="on">
+        <div class="auth-field">
+          <label class="auth-label" for="login-email">Email Address</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">📧</span>
+            <input type="email" id="login-email" class="auth-input" placeholder="doctor@hospital.com"
+              autocomplete="email" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label" for="login-password">Password</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input type="password" id="login-password" class="auth-input" placeholder="Enter your password"
+              autocomplete="current-password" required />
+            <button type="button" class="auth-pw-toggle" data-target="login-password" aria-label="Toggle password visibility">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="login-btn">
+          <span class="spinner"></span>
+          <span class="btn-text">Sign In</span>
+        </button>
+
+        <div class="auth-divider">or continue with</div>
+
+        <button type="button" class="auth-google-btn" id="google-login-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+      </form>
+
+      <!-- ── Register Form ─────────── -->
+      <form class="auth-form" id="register-form" autocomplete="on">
+        <div class="auth-field">
+          <label class="auth-label" for="reg-name">Full Name</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">👤</span>
+            <input type="text" id="reg-name" class="auth-input" placeholder="Dr. John Smith"
+              autocomplete="name" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label" for="reg-email">Email Address</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">📧</span>
+            <input type="email" id="reg-email" class="auth-input" placeholder="doctor@hospital.com"
+              autocomplete="email" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label" for="reg-password">Password</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input type="password" id="reg-password" class="auth-input" placeholder="Min 6 characters"
+              autocomplete="new-password" required minlength="6" />
+            <button type="button" class="auth-pw-toggle" data-target="reg-password" aria-label="Toggle password visibility">👁️</button>
+          </div>
+          <div class="pw-strength"><div class="pw-strength-bar" id="pw-strength-bar"></div></div>
+          <div class="pw-strength-text" id="pw-strength-text"></div>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label" for="reg-confirm">Confirm Password</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input type="password" id="reg-confirm" class="auth-input" placeholder="Re-enter password"
+              autocomplete="new-password" required />
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="register-btn">
+          <span class="spinner"></span>
+          <span class="btn-text">Create Account</span>
+        </button>
+
+        <div class="auth-divider">or continue with</div>
+
+        <button type="button" class="auth-google-btn" id="google-register-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign up with Google
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="auth-footer">
+      🔒 Secured by Firebase Authentication · <a href="https://firebase.google.com/docs/auth" target="_blank">Learn more</a>
+    </div>
+  </div>
+
+  <!-- Firebase + Auth Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
+
+  <!-- Login Page Logic -->
+  <script type="module">
+    // Wait for ClinicalAuth to be available
+    function waitForAuth() {
+      return new Promise((resolve) => {
+        if (window.ClinicalAuth) return resolve();
+        const check = setInterval(() => {
+          if (window.ClinicalAuth) { clearInterval(check); resolve(); }
+        }, 50);
+        // Timeout after 5s
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+      });
+    }
+
+    await waitForAuth();
+    const Auth = window.ClinicalAuth;
+
+    // ── Redirect if already logged in ──
+    Auth.redirectIfLoggedIn(() => {
+      document.querySelector('.auth-container').style.opacity = '1';
+    });
+
+    // Start hidden to prevent flash
+    document.querySelector('.auth-container').style.opacity = '0';
+    document.querySelector('.auth-container').style.transition = 'opacity 0.4s ease';
+
+    // ── Tab Switching ──
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.getElementById(`${tab.dataset.tab}-form`).classList.add('active');
+        hideMessage();
+      });
+    });
+
+    // ── Show/Hide Messages ──
+    function showMessage(text, type = 'error') {
+      const el = document.getElementById('auth-message');
+      const icon = document.getElementById('auth-message-icon');
+      const textEl = document.getElementById('auth-message-text');
+      el.className = `auth-message show ${type}`;
+      icon.textContent = type === 'error' ? '⚠️' : '✅';
+      textEl.textContent = text;
+    }
+
+    function hideMessage() {
+      document.getElementById('auth-message').classList.remove('show');
+    }
+
+    // ── Set Button Loading State ──
+    function setLoading(btn, loading) {
+      btn.classList.toggle('loading', loading);
+      btn.disabled = loading;
+    }
+
+    // ── Login Form Submit ──
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessage();
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('login-btn');
+
+      if (!email || !password) {
+        showMessage('Please fill in all fields.');
+        return;
+      }
+
+      setLoading(btn, true);
+      try {
+        await Auth.loginUser(email, password);
+        showMessage('Welcome back! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      } catch (err) {
+        showMessage(Auth.getErrorMessage(err));
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+
+    // ── Register Form Submit ──
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessage();
+
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-confirm').value;
+      const btn = document.getElementById('register-btn');
+
+      if (!name || !email || !password || !confirm) {
+        showMessage('Please fill in all fields.');
+        return;
+      }
+      if (password !== confirm) {
+        showMessage('Passwords do not match.');
+        document.getElementById('reg-confirm').classList.add('error');
+        return;
+      }
+      if (password.length < 6) {
+        showMessage('Password must be at least 6 characters.');
+        return;
+      }
+
+      setLoading(btn, true);
+      try {
+        await Auth.registerUser(email, password, name);
+        showMessage('Account created! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      } catch (err) {
+        showMessage(Auth.getErrorMessage(err));
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+
+    // ── Google OAuth (both buttons) ──
+    async function handleGoogleAuth() {
+      hideMessage();
+      try {
+        await Auth.loginWithGoogle();
+        showMessage('Authenticated! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      } catch (err) {
+        showMessage(Auth.getErrorMessage(err));
+      }
+    }
+
+    document.getElementById('google-login-btn').addEventListener('click', handleGoogleAuth);
+    document.getElementById('google-register-btn').addEventListener('click', handleGoogleAuth);
+
+    // ── Password Visibility Toggle ──
+    document.querySelectorAll('.auth-pw-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '🙈' : '👁️';
+      });
+    });
+
+    // ── Password Strength Meter ──
+    document.getElementById('reg-password').addEventListener('input', (e) => {
+      const pw = e.target.value;
+      const bar = document.getElementById('pw-strength-bar');
+      const text = document.getElementById('pw-strength-text');
+      let score = 0;
+
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+      const levels = [
+        { width: '0%', color: 'transparent', text: '' },
+        { width: '20%', color: '#ef4444', text: 'Very weak' },
+        { width: '40%', color: '#f97316', text: 'Weak' },
+        { width: '60%', color: '#eab308', text: 'Fair' },
+        { width: '80%', color: '#22c55e', text: 'Strong' },
+        { width: '100%', color: '#10b981', text: 'Very strong' },
+      ];
+
+      const level = levels[score];
+      bar.style.width = level.width;
+      bar.style.background = level.color;
+      text.textContent = level.text;
+      text.style.color = level.color;
+    });
+
+    // ── Particles Background ──
+    (function initParticles() {
+      const canvas = document.getElementById('particles-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = Array.from({ length: 45 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 0.5,
+        dx: (Math.random() - 0.5) * 0.35,
+        dy: (Math.random() - 0.5) * 0.35,
+        opacity: Math.random() * 0.4 + 0.1
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.dx;
+          p.y += p.dy;
+          if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(124, 58, 237, ${p.opacity})`;
+          ctx.fill();
+        });
+
+        particles.forEach((p1, i) => {
+          particles.slice(i + 1).forEach(p2 => {
+            const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(124, 58, 237, ${0.12 * (1 - dist / 100)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          });
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    })();
+  </script>
+</body>
+
+</html>
